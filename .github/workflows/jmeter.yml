@@ -22,10 +22,10 @@ jobs:
       - name: Run JMeter Tests
         run: jmeter -n -t ".github/workflows/HTTP.jmx" -l ".github/workflows/results/result.jtl" -e -o ".github/workflows/html"
 
-      # - name: List Results Directory
-      #   run: 
-      #     echo "Listing results directory:"
-      #     ls -la results
+      - name: List Results Directory
+        run: 
+          echo "Listing results directory:"
+          ls -la results
 
       - name: Upload Results
         uses: actions/upload-artifact@v3
