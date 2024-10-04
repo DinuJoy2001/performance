@@ -14,7 +14,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set Up JMeter
-        run: sudo apt-get install -y jmeter  
+        run: 
+          sudo apt-get update
+          sudo apt-get install -y jmeter
 
       - name: Check jmeter version
         run: jmeter -v # This creates both the results folder and the html folder inside it
