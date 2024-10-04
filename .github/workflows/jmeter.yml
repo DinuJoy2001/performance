@@ -1,4 +1,4 @@
-name: Automated JMeter Tests
+name: Automated JMeter Test
 
 on: 
   push:
