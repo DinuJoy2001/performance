@@ -1,43 +1,58 @@
-name: Automated JMeter Test
+name: Automated JMeter Tests
 
-on: 
-  push:
-    branches: 
-      - main
+on:
+  workflow_dispatch:
+    inputs:
+      threads:
+        description: 'Number of Threads'
+        required: false  # Make it optional
+      loops:
+        description: 'Number of Loops'
+        required: false  # Make it optional
+      rampUp:
+        description: 'Ramp-Up Time (in seconds)'
+        required: false  # Make it optional
+       
 
 jobs:
   automated-jmeter-tests:
-    runs-on: ubantu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set Up JMeter
-        run: 
-          sudo apt-get update
-          sudo apt-get install -y jmeter
+        run: choco install jmeter -y  # Use Chocolatey to install JMeter on Windows
 
-      - name: Check jmeter version
+      - name: Check JMeter Version
         run: jmeter -v # This creates both the results folder and the html folder inside it
 
+      - name: Create Properties File
+        run: |
+          echo "threads=${{ github.event.inputs.threads || 10 }}" > jmeter.properties
+          echo "loops=${{ github.event.inputs.loops || 100 }}" >> jmeter.properties
+          echo "rampUp=${{ github.event.inputs.rampUp || 10 }}" >> jmeter.properties  # Add ramp-up time
+
       - name: Run JMeter Tests
-        run: jmeter -n -t ".github/workflows/HTTP.jmx" -l ".github/workflows/results/result.jtl" -e -o ".github/workflows/html"
+        run: |
+          # Run JMeter tests with specified properties file
+          jmeter -n -t scripts/HTTP.jmx -p jmeter.properties -l results/result.jtl -e -o html
 
       - name: List Results Directory
-        run: 
+        run: |
           echo "Listing results directory:"
-          ls -la results
+          dir results # Use 'dir' on Windows instead of 'ls'
 
-      - name: Upload Results
+      - name: Upload JMeter Results
         uses: actions/upload-artifact@v3
         with:
           name: jmeter-results
-          path: .github/workflows/results/result.jtl
-      - name: Upload Results
+          path: results/result.jtl
+
+      - name: Upload HTML Report
         uses: actions/upload-artifact@v3
         with:
-          name: jmeter-results
-          path: .github/workflows/html  # This uploads the entire HTML report folder
+          name: jmeter-html-report
+          path: html  # This uploads the entire HTML report folder
           if-no-files-found: error
-          
